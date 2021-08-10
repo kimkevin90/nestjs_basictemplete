@@ -6,22 +6,37 @@ import { ArticleRepository } from './article.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './article.entity';
 import { ArticleStatus } from './articles.model';
+import { User } from 'src/auth/user.entity';
 @Injectable()
 export class ArticlesService {
   constructor(
     @InjectRepository(ArticleRepository)
-    private articleRepository: ArticleRepository){}
+    private articleRepository: ArticleRepository) { }
+
+
+
+  async getAllArticles(
+    user: User
+  ): Promise<Article[]> {
+    const query = this.articleRepository.createQueryBuilder('article');
+
+    query.where('article.userId = :userId', { userId: user.id });
+
+    const articls = await query.getMany();
+    return articls;
+  }
+
 
   async getArticleById(id: number): Promise<Article> {
     const found = await this.articleRepository.findOne(id);
 
-    if(!found) {
+    if (!found) {
       throw new NotFoundException(`해당 ID를 찾을 수 없습니다.`)
     }
     return found;
   }
 
-  createArticle(createArticleDto: CreateArticleDto):Promise<Article> {
+  createArticle(createArticleDto: CreateArticleDto, user: User): Promise<Article> {
     // const { title, description } = createArticleDto;
 
     // const article= this.articleRepository.create({
@@ -31,24 +46,23 @@ export class ArticlesService {
     // })
     // await this.articleRepository.save(article);
     // return article;
-    return this.articleRepository.createArticle(createArticleDto);
+    return this.articleRepository.createArticle(createArticleDto, user);
   }
 
-  async deleteArticle(id: number): Promise<void> {
-    const result = await this.articleRepository.delete(id);
-    if(result.affected === 0) {
+  async deleteArticle(id: number, user: User): Promise<void> {
+    const result = await this.articleRepository.delete({ id, user });
+    if (result.affected === 0) {
       throw new NotFoundException('해당 id를 찾을 수 없습니다.')
     }
   }
 
-  async updateArticleStatus(id:number, status:ArticleStatus): Promise<Article> {
+  async updateArticleStatus(id: number, status: ArticleStatus): Promise<Article> {
     const article = await this.getArticleById(id);
     article.status = status;
     await this.articleRepository.save(article);
 
     return article;
   }
-
 
 
   // private articles: Article[] = [];
