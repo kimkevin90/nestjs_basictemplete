@@ -11,7 +11,7 @@ import { OwnersModule } from './owners/owners.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb+srv://classesd:pass@cluster0.yfbmb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+      'mongodb+srv://classesd:@cluster0.yfbmb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
     ),
     // TypeOrmModule.forRoot(typeORMConfig),
     // ArticlesModule,
